@@ -16,7 +16,7 @@ class PlaceholderDataLoader:
     def __iter__(self):
         return self
 
-loss_fn = torch.nn.MSELoss()
+loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
     
 
 def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float):
@@ -27,25 +27,26 @@ def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: flo
     losses: list[float] = []
     for e in range(epochs):
         
+        avg_loss = 0.0
+        
         for i, data in enumerate(data_loader):
             
             print(f'Batch {i}', end='\r')
         
             inputs, labels, timesteps = data
             
-            print(inputs.shape)
-            print(labels.shape)
-            print(timesteps.shape)
-            
             optimizer.zero_grad()
             
             outputs = model(inputs, timesteps)
-            loss = loss_fn(outputs, labels)
+            loss: torch.Tensor = loss_fn(outputs, labels)
             loss.backward()
             
             optimizer.step()
+            
+            avg_loss = (avg_loss + loss.item()) / (i + 1)
+            
         
-        losses.append(loss.item())
+        losses.append(avg_loss)
         
         if e % 1 == 0:
             print(f'Epoch {e}  Loss: {losses[-1]:.2f}  Best: {min(losses):.2f}')
