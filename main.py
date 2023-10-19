@@ -20,6 +20,8 @@ loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
     
 
 def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float, batch: int):
+
+    print(batch)
         
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     data_loader = get_dataloader(batch)
@@ -63,7 +65,7 @@ def main():
     parser.add_argument('-o', '--out', help='Path to store the model', default='model')
     parser.add_argument('-lr', '--learning-rate', dest='learning_rate', default=0.001)
     parser.add_argument('-m', '--momentum', default=0.9)
-    parser.add_argument('-b', '--batch', default=128)
+    parser.add_argument('-b', '--batch', default=128, type=int)
     
     
     args = parser.parse_args()
