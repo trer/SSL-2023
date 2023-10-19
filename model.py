@@ -1,5 +1,6 @@
 import torch
 import math
+from utils import get_schedule
 
 
 def positionalencoding2d(d_model, height, width):
@@ -42,6 +43,7 @@ class MNISTDiffuser(torch.nn.Module):
         # Simple CNN UNet architecture
         # self.pos_embedding = SinusoidalPosEmb(dim)
         self.dim = dim
+        self.n_timesteps = n_timesteps
         self.pos_embedding = positionalencoding2d(n_timesteps, dim, dim)
         self.encoder = torch.nn.Sequential(
             torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
@@ -60,8 +62,26 @@ class MNISTDiffuser(torch.nn.Module):
             torch.nn.Sigmoid(),
         )
 
+    def generate_sample(self):
+        with torch.no_grad():
+            a, b = get_schedule(self.n_timesteps)
+
+            x = torch.normal(0, 1, size=(1, self.dim, self.dim))
+            z = torch.normal(0, 1, size=(1, self.dim, self.dim))
+            for t in range(self.n_timesteps - 1, 0, -1):
+                a_t = a[t]
+                a_t_bar = a[:t].prod()
+                b_t = b[t]
+                sigma = torch.sqrt(b_t)
+                noise = self.forward(x, t)
+                x = (1 / torch.sqrt(a_t)) * (
+                    x - b_t / (torch.sqrt(1 - a_t_bar)) * noise
+                ) + sigma * z
+
+        return x
+
     def forward(self, x, timestep):
-        out = x + self.pos_embedding[timestep].reshape(1, self.dim, self.dim)
+        out = x + self.pos_embedding[timestep]
         out = self.encoder(out)
         out = self.decoder(out)
         return out
