@@ -61,7 +61,7 @@ class MNISTDiffuser(torch.nn.Module):
         )
 
     def forward(self, x, timestep):
-        out = x + self.pos_embedding[timestep].reshape(1, self.dim, self.dim)
+        out = x + self.pos_embedding[timestep]
         out = self.encoder(out)
         out = self.decoder(out)
         return out
