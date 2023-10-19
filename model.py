@@ -41,6 +41,7 @@ class MNISTDiffuser(torch.nn.Module):
         super().__init__()
         # Simple CNN UNet architecture
         # self.pos_embedding = SinusoidalPosEmb(dim)
+        self.dim = dim
         self.pos_embedding = positionalencoding2d(n_timesteps, dim, dim)
         self.encoder = torch.nn.Sequential(
             torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
@@ -60,7 +61,7 @@ class MNISTDiffuser(torch.nn.Module):
         )
 
     def forward(self, x, timestep):
-        out = x + self.pos_embedding[timestep].reshape(1, 28, 28)
+        out = x + self.pos_embedding[timestep].reshape(1, self.dim, self.dim)
         out = self.encoder(out)
         out = self.decoder(out)
         return out
