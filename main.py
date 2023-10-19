@@ -5,7 +5,7 @@ import random
 
 
 from model import MNISTDiffuser
-from generator import Generator
+from generator import get_dataloader
 
 # Placeholder
 class PlaceholderDataLoader:
@@ -19,10 +19,10 @@ class PlaceholderDataLoader:
 loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
     
 
-def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float):
+def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float, batch: int):
         
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    data_loader = Generator()
+    data_loader = get_dataloader(batch)
     
     losses: list[float] = []
     for e in range(epochs):
@@ -31,7 +31,7 @@ def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: flo
         
         for i, data in enumerate(data_loader):
             
-            print(f'Batch {i}', end='\r')
+            print(f'Batch {i}/{len(data_loader)}', end='\r')
         
             inputs, labels, timesteps = data
             
@@ -63,6 +63,7 @@ def main():
     parser.add_argument('-o', '--out', help='Path to store the model', default='model')
     parser.add_argument('-lr', '--learning-rate', dest='learning_rate', default=0.001)
     parser.add_argument('-m', '--momentum', default=0.9)
+    parser.add_argument('-b', '--batch', default=128)
     
     
     args = parser.parse_args()
@@ -73,7 +74,7 @@ def main():
             model.load_state_dict(torch.load(args.load))
             model.eval()
             
-        train(model, args.epochs, args.learning_rate, args.momentum)
+        train(model, args.epochs, args.learning_rate, args.momentum, args.batch)
         
         torch.save(model.state_dict(), args.out)
     
