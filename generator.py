@@ -1,9 +1,10 @@
 from mnist import MNIST
 import torch
+from torch.utils.data import Dataset, DataLoader
 from utils import get_schedule
 
 
-class Generator:
+class MNIST_Dataset(Dataset):
 
     def __init__(self, T=1000, images=None):
         self.T = T
@@ -20,19 +21,15 @@ class Generator:
     def __len__(self):
         return self.len
 
-    def __iter__(self):
-        return self
-
-
-    def __next__(self, batch_size=1) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def __getitem__(self, item) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         if self.index + 1 >= self.len:
             self.index = 0
             raise StopIteration
-        img = self.images[self.index]
+        img = self.images[self.index:self.index + 1]
         img = torch.asarray(img)
         img = torch.reshape(img, (1, 28, 28))
         self.index = self.index + 1
-        return self.create_example(img, batch_size)
+        return self.create_example(img, 1)
 
     def add_noise(self, image, timestep):
         bt = self.b_t[timestep]
@@ -51,11 +48,16 @@ class Generator:
         time_step = torch.randint(0, self.T, (batch_size,))
         prev, noise = self.noise_to_timestep(image, time_step)
         after, noise = self.add_noise(prev, time_step)
-        return after, noise, time_step + 1
+        return after, noise, time_step
 
+
+def get_dataloader(batch_size):
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
-    gen = Generator()
+    dataset = MNIST_Dataset()
+    train_dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    for example in train_dataloader:
+        print(example[0].shape)
+        print(len(example))
 
-    for a, b, c in gen:
-        print(a, b, c)
