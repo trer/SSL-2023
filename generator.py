@@ -27,6 +27,7 @@ class MNIST_Dataset(Dataset):
             raise StopIteration
         img = self.images[self.index:self.index + 1]
         img = torch.asarray(img)
+        img = self.normalize(img)
         img = torch.reshape(img, (1, 28, 28))
         self.index = self.index + 1
         return self.create_example(img, 1)
@@ -49,6 +50,9 @@ class MNIST_Dataset(Dataset):
         prev, noise = self.noise_to_timestep(image, time_step)
         after, noise = self.add_noise(prev, time_step)
         return after, noise, time_step
+
+    def normalize(self, img):
+        return (img - torch.min(img))/(torch.max(img)-torch.min(img))
 
 
 def get_dataloader(batch_size):
