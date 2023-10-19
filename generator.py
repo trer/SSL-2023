@@ -52,6 +52,7 @@ class MNIST_Dataset(Dataset):
 
 
 def get_dataloader(batch_size):
+    dataset = MNIST_Dataset()
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 if __name__ == "__main__":
