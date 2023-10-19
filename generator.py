@@ -51,7 +51,7 @@ class Generator:
         time_step = torch.randint(0, self.T, (batch_size,))
         prev, noise = self.noise_to_timestep(image, time_step)
         after, noise = self.add_noise(prev, time_step)
-        return after, noise, time_step + 1
+        return after, noise, time_step
 
 
 if __name__ == "__main__":
