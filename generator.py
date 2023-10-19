@@ -1,14 +1,13 @@
 from mnist import MNIST
 import torch
+from utils import get_schedule
 
 
 class Generator:
 
     def __init__(self, T=1000, images=None):
         self.T = T
-        self.b_t = torch.asarray([10 ** -4 + 0.02 / T * i for i in range(T)])
-        self.a_t = torch.asarray([1 - bt for bt in self.b_t])
-        self.A_t = torch.asarray([torch.prod(self.a_t[:t]) for t in range(T)])
+        self.a_t, self.b_t, self.A_t = get_schedule(T)
 
         if images is None:
             mndata = MNIST('./MNIST')
@@ -24,14 +23,15 @@ class Generator:
     def __iter__(self):
         return self
 
-    def __next__(self, timestep=None):
-        if self.index + 1 >= self.len:
+    def __next__(self, batch_size=1):
+        if self.index + batch_size >= self.len:
             self.index = 0
             raise StopIteration
         img = self.images[self.index]
         img = torch.asarray(img)
+        img = torch.reshape(img, (1, 28, 28))
         self.index = self.index + 1
-        return self.create_example(img, timestep)
+        return self.create_example(img, batch_size)
 
     def add_noise(self, image, timestep):
         bt = self.b_t[timestep]
@@ -46,9 +46,8 @@ class Generator:
         image = image + noise
         return image, noise
 
-    def create_example(self, image, time_step=None):
-        if time_step is None:
-            time_step = torch.randint(0, self.T, (1,))
+    def create_example(self, image, batch_size=1):
+        time_step = torch.randint(0, self.T, (batch_size,))
         prev, noise = self.noise_to_timestep(image, time_step)
         after, noise = self.add_noise(prev, time_step)
         return after, noise, time_step + 1
@@ -56,6 +55,6 @@ class Generator:
 
 if __name__ == "__main__":
     gen = Generator()
-    
+
     for a, b, c in gen:
         print(a, b, c)
