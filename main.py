@@ -5,11 +5,16 @@ import random
 
 
 from model import MNISTDiffuser
+from generator import Generator
 
-# Placeholders
-class DataLoader:
-    def data(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+# Placeholder
+class PlaceholderDataLoader:
+    def __next__(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if random.random() < 0.1:
+            raise StopIteration
         return torch.tensor([[[[random.random()]*28]*28]]*100), torch.tensor([[[[random.random()]*28]*28]]*100), torch.tensor([[random.randint(0, 1000)]]*100)
+    def __iter__(self):
+        return self
 
 loss_fn = torch.nn.MSELoss()
     
@@ -17,24 +22,33 @@ loss_fn = torch.nn.MSELoss()
 def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float):
         
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    data_loader = DataLoader()
+    data_loader = Generator()
     
     losses: list[float] = []
-    for i in range(epochs):
-        inputs, labels, timesteps = data_loader.data()
+    for e in range(epochs):
         
-        optimizer.zero_grad()
+        for i, data in enumerate(data_loader):
+            
+            print(f'Batch {i}', end='\r')
         
-        outputs = model(inputs, timesteps)
-        loss = loss_fn(outputs, labels)
-        loss.backward()
-        
-        optimizer.step()
+            inputs, labels, timesteps = data
+            
+            print(inputs.shape)
+            print(labels.shape)
+            print(timesteps.shape)
+            
+            optimizer.zero_grad()
+            
+            outputs = model(inputs, timesteps)
+            loss = loss_fn(outputs, labels)
+            loss.backward()
+            
+            optimizer.step()
         
         losses.append(loss.item())
         
-        if i % 10 == 0:
-            print(f'Epoch {i}  Loss: {losses[-1]:.2f}  Best: {min(losses):.2f}')
+        if e % 1 == 0:
+            print(f'Epoch {e}  Loss: {losses[-1]:.2f}  Best: {min(losses):.2f}')
             
         
 

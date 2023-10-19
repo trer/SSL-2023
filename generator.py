@@ -23,8 +23,9 @@ class Generator:
     def __iter__(self):
         return self
 
-    def __next__(self, batch_size=1):
-        if self.index + batch_size >= self.len:
+
+    def __next__(self, batch_size=1) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if self.index + 1 >= self.len:
             self.index = 0
             raise StopIteration
         img = self.images[self.index]
