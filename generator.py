@@ -24,7 +24,7 @@ class Generator:
     def __iter__(self):
         return self
 
-    def __next__(self, timestep=None):
+    def __next__(self, timestep=None) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         if self.index + 1 >= self.len:
             self.index = 0
             raise StopIteration
