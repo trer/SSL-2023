@@ -1,5 +1,6 @@
 import argparse
 import torch
+from tqdm import tqdm
 
 import random
 
@@ -31,9 +32,9 @@ def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: flo
         
         avg_loss = 0.0
         
-        for i, data in enumerate(data_loader):
+        for i, data in tqdm(enumerate(data_loader), total=len(data_loader)):
             
-            print(f'Batch {i}/{len(data_loader)}', end='\r')
+            # print(f'Batch {i}/{len(data_loader)}', end='\r')
         
             inputs, labels, timesteps = data
             
