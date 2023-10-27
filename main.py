@@ -1,6 +1,7 @@
 import argparse
 import torch
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 import random
 
@@ -80,6 +81,18 @@ def main():
         train(model, args.epochs, args.learning_rate, args.momentum, args.batch)
         
         torch.save(model.state_dict(), args.out)
+    if args.mode == 'predict':
+        model = MNISTDiffuser(1000, 28)
+        if args.load:
+            model.load_state_dict(torch.load(args.load))
+            model.eval()
+
+        sample = model.generate_sample()
+
+        plt.imshow(sample.reshape(28, 28), cmap='gray')
+        plt.savefig('fig')
+        
+
     
     
     
