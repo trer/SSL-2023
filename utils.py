@@ -1,5 +1,6 @@
 import torch
 
+device = torch.device('cuda') if  torch.cuda.is_available() else torch.device('cpu')
 
 def get_schedule(T: int):
     b_t = torch.asarray([10**-4 + 0.02 / T * i for i in range(T)])
@@ -7,3 +8,4 @@ def get_schedule(T: int):
     A_t = torch.asarray([torch.prod(a_t[:t]) for t in range(T)])
 
     return a_t, b_t, A_t
+

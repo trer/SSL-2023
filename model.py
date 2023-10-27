@@ -1,6 +1,6 @@
 import torch
 import math
-from utils import get_schedule
+from utils import get_schedule, device
 
 
 def positionalencoding2d(d_model, height, width):
@@ -34,7 +34,7 @@ def positionalencoding2d(d_model, height, width):
         torch.cos(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, width)
     )
 
-    return pe
+    return pe.to(device=device)
 
 
 class MNISTDiffuser(torch.nn.Module):
@@ -64,7 +64,7 @@ class MNISTDiffuser(torch.nn.Module):
 
     def generate_sample(self):
         with torch.no_grad():
-            a, b = get_schedule(self.n_timesteps)
+            a, b, _ = get_schedule(self.n_timesteps)
 
             x = torch.normal(0, 1, size=(1, self.dim, self.dim))
             z = torch.normal(0, 1, size=(1, self.dim, self.dim))
