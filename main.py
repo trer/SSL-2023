@@ -8,6 +8,7 @@ import random
 
 from model import MNISTDiffuser
 from generator import get_dataloader
+from utils import device
 
 # Placeholder
 class PlaceholderDataLoader:
@@ -23,7 +24,7 @@ loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
 
 def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: float, batch: int):
 
-    print(batch)
+    model.to(device=device)
         
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     data_loader = get_dataloader(batch)
@@ -34,11 +35,11 @@ def train(model: MNISTDiffuser, epochs: int, learning_rate: float, momentum: flo
         avg_loss = 0.0
         
         for i, data in tqdm(enumerate(data_loader), total=len(data_loader)):
-            
+
             # print(f'Batch {i}/{len(data_loader)}', end='\r')
         
-            inputs, labels, timesteps = data
-            
+            inputs, labels, timesteps = [d.to(device=device) for d in data]
+
             optimizer.zero_grad()
             
             outputs = model(inputs, timesteps)
@@ -71,6 +72,7 @@ def main():
     
     
     args = parser.parse_args()
+
     
     if args.mode == 'train':
         model = MNISTDiffuser(1000, 28)

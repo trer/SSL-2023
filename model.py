@@ -1,6 +1,6 @@
 import torch
 import math
-from utils import get_schedule
+from utils import get_schedule, device
 
 
 def positionalencoding2d(d_model, height, width):
@@ -34,7 +34,7 @@ def positionalencoding2d(d_model, height, width):
         torch.cos(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, width)
     )
 
-    return pe
+    return pe.to(device=device)
 
 
 class MNISTDiffuser(torch.nn.Module):
