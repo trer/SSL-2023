@@ -9,3 +9,6 @@ def get_schedule(T: int):
 
     return a_t, b_t, A_t
 
+def normalize(img: torch.Tensor, a = -1, b = 1) -> torch.Tensor:
+    return ((b - a) * (img - img.min())/(img.max()-img.min())) + a
+
