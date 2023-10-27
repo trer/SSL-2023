@@ -77,8 +77,11 @@ def main():
         if args.load:
             model.load_state_dict(torch.load(args.load))
             model.eval()
-            
-        train(model, args.epochs, args.learning_rate, args.momentum, args.batch)
+
+        try:
+            train(model, args.epochs, args.learning_rate, args.momentum, args.batch)
+        except KeyboardInterrupt:
+            pass
         
         torch.save(model.state_dict(), args.out)
     if args.mode == 'predict':
