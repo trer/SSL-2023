@@ -66,8 +66,8 @@ class MNISTDiffuser(torch.nn.Module):
         with torch.no_grad():
             a, b, _ = get_schedule(self.n_timesteps)
 
-            x = torch.normal(0, 1, size=(1, self.dim, self.dim))
-            z = torch.normal(0, 1, size=(1, self.dim, self.dim))
+            x = torch.normal(0, 1, size=(1, self.dim, self.dim)).to(device=device)
+            z = torch.normal(0, 1, size=(1, self.dim, self.dim)).to(device=device)
             for t in range(self.n_timesteps - 1, 0, -1):
                 a_t = a[t]
                 a_t_bar = a[:t].prod()
