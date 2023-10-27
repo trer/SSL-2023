@@ -85,7 +85,7 @@ def main():
 
         sample = model.generate_sample()
 
-        plt.imshow(sample.reshape(28, 28), cmap="gray")
+        plt.imshow(sample.reshape(28, 28).cpu(), cmap="gray")
         plt.savefig("fig")
 
 
