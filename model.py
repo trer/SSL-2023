@@ -1,6 +1,7 @@
 import torch
 import math
-from utils import get_schedule, device
+from utils import get_schedule, device, normalize
+import matplotlib.pyplot as plt
 
 
 def positionalencoding2d(d_model, height, width):
@@ -114,6 +115,7 @@ class MNISTDiffuser(torch.nn.Module):
         return x
 
     def forward(self, x, timestep):
+        # TODO: Actually use the timestep
         out1 = self.block1(x)
         out2 = self.block2(self.down1(out1))
         out3 = self.bottleneck(self.down2(out2))
