@@ -81,6 +81,8 @@ def main():
             model.load_state_dict(torch.load(args.load))
             model.eval()
 
+        model.to(device=device)
+
         sample = model.generate_sample()
 
         plt.imshow(sample.reshape(28, 28), cmap="gray")
