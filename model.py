@@ -64,7 +64,7 @@ class MNISTDiffuser(torch.nn.Module):
 
     def generate_sample(self):
         with torch.no_grad():
-            a, b = get_schedule(self.n_timesteps)
+            a, b, _ = get_schedule(self.n_timesteps)
 
             x = torch.normal(0, 1, size=(1, self.dim, self.dim))
             z = torch.normal(0, 1, size=(1, self.dim, self.dim))
