@@ -1,7 +1,7 @@
 from mnist import MNIST
 import torch
 from torch.utils.data import Dataset, DataLoader
-from utils import get_schedule
+from utils import get_schedule, normalize
 from matplotlib import pyplot as plt
 
 
@@ -28,7 +28,7 @@ class MNIST_Dataset(Dataset):
             raise StopIteration
         img = self.images[self.index:self.index + 1]
         img = torch.asarray(img)
-        img = self.normalize(img)
+        img = normalize(img)
         img = torch.reshape(img, (1, 28, 28))
         self.index = self.index + 1
         return self.create_example(img, 1)
@@ -37,7 +37,7 @@ class MNIST_Dataset(Dataset):
         bt = self.b_t[timestep]
         abart = self.A_t[timestep]
         # noise_and_image = torch.normal(torch.sqrt(1 - bt) * image, bt)
-        noise = torch.rand_like(image)
+        noise = torch.randn_like(image)
         image = abart.sqrt() * image + (1 - abart).sqrt() * noise
 
         return image, noise
@@ -55,8 +55,6 @@ class MNIST_Dataset(Dataset):
         after, noise = self.add_noise(image, time_step)
         return after, noise, time_step
 
-    def normalize(self, img):
-        return (img - torch.min(img))/(torch.max(img)-torch.min(img))
 
 
 def get_dataloader(batch_size):
@@ -68,7 +66,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
     img = dataset.images[1]
     img = torch.asarray(img)
-    img = dataset.normalize(img)
+    img = normalize(img)
     img = torch.reshape(img, (1, 28, 28))
     fix, ax = plt.subplots(2, 10)
     for i in range(0, 1000, 100):
