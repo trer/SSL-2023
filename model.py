@@ -45,22 +45,55 @@ class MNISTDiffuser(torch.nn.Module):
         self.dim = dim
         self.n_timesteps = n_timesteps
         self.pos_embedding = positionalencoding2d(n_timesteps, dim, dim)
-        self.encoder = torch.nn.Sequential(
+        self.block1 = torch.nn.Sequential(
             torch.nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
             torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=2, stride=2),
             torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
             torch.nn.ReLU(),
-            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+        self.down1 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.block2 = torch.nn.Sequential(
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
         )
 
-        # decoder that upscales back to the original size
-        self.decoder = torch.nn.Sequential(
-            torch.nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2),
+        self.down2 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # bottle neck
+
+        self.bottleneck = torch.nn.Sequential(
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
             torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(32, 1, kernel_size=2, stride=2),
-            torch.nn.Sigmoid(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
         )
+
+        # Up
+        self.up1 = torch.nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2)
+        self.block3 = torch.nn.Sequential(
+            torch.nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+        )
+
+        self.up2 = torch.nn.ConvTranspose2d(32, 32, kernel_size=2, stride=2)
+
+        self.block4 = torch.nn.Sequential(
+            torch.nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            torch.nn.ReLU(),
+        )
+
+        self.final = torch.nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
     def generate_sample(self):
         with torch.no_grad():
@@ -81,7 +114,9 @@ class MNISTDiffuser(torch.nn.Module):
         return x
 
     def forward(self, x, timestep):
-        out = x + self.pos_embedding[timestep]
-        out = self.encoder(out)
-        out = self.decoder(out)
-        return out
+        out1 = self.block1(x)
+        out2 = self.block2(self.down1(out1))
+        out3 = self.bottleneck(self.down2(out2))
+        out4 = self.block3(torch.cat([self.up1(out3), out2], dim=1))
+        out5 = self.block4(torch.cat([self.up2(out4), out1], dim=1))
+        return self.final(out5)
