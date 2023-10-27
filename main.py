@@ -26,7 +26,7 @@ def train(
         for i, data in tqdm(enumerate(data_loader), total=len(data_loader)):
             # print(f'Batch {i}/{len(data_loader)}', end='\r')
 
-            inputs, labels, timesteps = data  # [d.to(device=device) for d in data]
+            inputs, labels, timesteps = [d.to(device=device) for d in data]
 
             optimizer.zero_grad()
 
