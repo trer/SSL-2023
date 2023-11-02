@@ -2,11 +2,13 @@ import argparse
 import torch
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from torch.utils.tensorboard import SummaryWriter
 
 from model import MNISTDiffuser
 from generator import get_dataloader
 from utils import device
 
+writer = SummaryWriter()
 
 loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
 
@@ -39,6 +41,7 @@ def train(
             epoch_losses.append(loss.item())
 
         avg_loss = sum(epoch_losses) / len(epoch_losses)
+        writer.add_scalar("Loss/train (avg)", avg_loss, e)
         losses.append(avg_loss)
 
         if e % 1 == 0:
@@ -83,9 +86,15 @@ def main():
 
         model.to(device=device)
 
-        sample = model.generate_sample()
+        samples = model.generate_sample()
 
-        plt.imshow(sample.reshape(28, 28).cpu(), cmap="gray")
+        n = 10
+        fig, ax = plt.subplots(1, n)
+        step_size = len(samples) // n
+        for i in range(0, n):
+            sample = samples[i * step_size]
+            ax[i].imshow(sample.reshape(28, 28).cpu(), cmap="gray")
+        plt.imshow(samples[-1].reshape(28, 28).cpu(), cmap="gray")
         plt.savefig("fig")
 
 

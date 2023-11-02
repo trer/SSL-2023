@@ -80,25 +80,30 @@ class MNISTDiffuser(torch.nn.Module):
         self.final = torch.nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
     def generate_sample(self):
+        ims = []
         with torch.no_grad():
             a, b, _ = get_schedule(self.n_timesteps)
 
             x = torch.normal(0, 1, size=(1, 1, self.dim, self.dim)).to(device=device)
-            z = torch.normal(0, 1, size=(1, 1, self.dim, self.dim)).to(device=device)
-            for t in range(self.n_timesteps - 1, 0, -1):
+            for t in range(self.n_timesteps - 1, 1, -1):
+                ims.append(x)
                 a_t = a[t]
                 a_t_bar = a[:t].prod()
                 b_t = b[t]
                 sigma = torch.sqrt(b_t)
-                time = torch.tensor([t])
-                noise = self.forward(x, time)
+                z = torch.normal(0, 1, size=(1, 1, self.dim, self.dim)).to(
+                    device=device
+                )
+
+                time_tensor = (torch.ones(1, 1) * t).to(device).long()
+                noise = self.forward(x, time_tensor)
                 if t == 1:
                     z = torch.zeros_like(z)
                 x = (1 / torch.sqrt(a_t)) * (
                     x - b_t / (torch.sqrt(1 - a_t_bar)) * noise
                 ) + sigma * z
 
-        return x
+        return ims
 
     def forward(self, x: torch.tensor, t: torch.tensor):
         n = len(x)
