@@ -40,6 +40,15 @@ The total training took around 5.5 minutes for 20 epochs and around 30 minutes f
 
 
 ## Sampling
+To sample an image we start from normal distribution noise with the same dimentions as our training data.
+We then remove noise in each iteration until we end up with what hopefully should look like an image belonging to our dataset.
+
+In more detail:
+In each iteration the network predicts the noise in the image and a fraction of this predicted noise is removed.
+Then a small amount of noise from a new normal distribution is added back to the image.
+In the last iteration no noise is added to the image.
+Both the noise added to the image and how much noise is removed is decided by hyperparameters called the noise schedule.
+
 
 
 ## Results
