@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
 from model import MNISTDiffuser
-from generator import get_dataloader
+from generator import MNIST_Dataset, get_dataloader
 from utils import device
 
 writer = SummaryWriter()
@@ -52,8 +52,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Arguments
-    parser.add_argument("mode", choices=["train", "predict"])
-    parser.add_argument("-e", "--epochs", type=int, default=100)
+    parser.add_argument("mode", choices=["train", "predict", "debug"])
+    parser.add_argument("-e", "--epochs", type=int, default=20)
     parser.add_argument(
         "-l", "--load", help="Path to the model to load for further training"
     )
@@ -96,6 +96,40 @@ def main():
             ax[i].imshow(sample.reshape(28, 28).cpu(), cmap="gray")
         plt.imshow(samples[-1].reshape(28, 28).cpu(), cmap="gray")
         plt.savefig("fig")
+        plt.figure()
+        plt.imshow(sample.reshape(28, 28).cpu(), cmap="gray")
+        plt.show()
+        # plt.savefig("fig")
+        
+    if args.mode == 'debug':
+        model = MNISTDiffuser(1000, 28)
+        if args.load:
+            model.load_state_dict(torch.load(args.load))
+            model.eval()
+
+        model.to(device=device)
+        dataset = MNIST_Dataset()
+        
+        image = dataset[0][0].to(device=device).unsqueeze(0)
+        print(image)
+        noisy, noise = dataset.add_noise(image, 500)
+        
+        n = model.forward(noisy, 500)
+        
+        plt.figure()
+        plt.imshow(noise.detach().reshape(28, 28).cpu(), cmap="gray")
+        plt.savefig('fig1')
+        plt.figure()
+        plt.imshow(n.detach().reshape(28, 28).cpu(), cmap="gray")
+        plt.savefig('fig2')
+        
+        plt.figure()
+        plt.imshow((noise - n).detach().reshape(28, 28).cpu(), cmap='gray')
+        plt.show()
+        plt.savefig('fig3')
+        
+        
+        
 
 
 if __name__ == "__main__":
