@@ -8,7 +8,6 @@ from model import MNISTDiffuser
 from generator import MNIST_Dataset, get_dataloader
 from utils import device
 
-writer = SummaryWriter()
 
 loss_fn: torch.nn.MSELoss = torch.nn.MSELoss()
 
@@ -18,6 +17,7 @@ def train(
 ):
     model.to(device=device)
 
+    writer = SummaryWriter()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     data_loader = get_dataloader(batch)
 
@@ -100,8 +100,8 @@ def main():
         plt.imshow(sample.reshape(28, 28).cpu(), cmap="gray")
         plt.show()
         # plt.savefig("fig")
-        
-    if args.mode == 'debug':
+
+    if args.mode == "debug":
         model = MNISTDiffuser(1000, 28)
         if args.load:
             model.load_state_dict(torch.load(args.load))
@@ -109,27 +109,24 @@ def main():
 
         model.to(device=device)
         dataset = MNIST_Dataset()
-        
+
         image = dataset[0][0].to(device=device).unsqueeze(0)
         print(image)
         noisy, noise = dataset.add_noise(image, 500)
-        
+
         n = model.forward(noisy, 500)
-        
+
         plt.figure()
         plt.imshow(noise.detach().reshape(28, 28).cpu(), cmap="gray")
-        plt.savefig('fig1')
+        plt.savefig("fig1")
         plt.figure()
         plt.imshow(n.detach().reshape(28, 28).cpu(), cmap="gray")
-        plt.savefig('fig2')
-        
+        plt.savefig("fig2")
+
         plt.figure()
-        plt.imshow((noise - n).detach().reshape(28, 28).cpu(), cmap='gray')
+        plt.imshow((noise - n).detach().reshape(28, 28).cpu(), cmap="gray")
         plt.show()
-        plt.savefig('fig3')
-        
-        
-        
+        plt.savefig("fig3")
 
 
 if __name__ == "__main__":
