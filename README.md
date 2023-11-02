@@ -26,6 +26,18 @@ The resulting noisy image and the time_step will be the input to the network and
 
 ## Training
 
+The following hardware was used for training:
+
+- CPU: AMD Ryzen 7 3700X
+- GPU: Nvidia RTX 2080ti, 11GB VRAM
+- RAM: 32GB
+
+The model was trained for 100 epochs with a batch size of 512, an Adam optimizer with learning rate of `0.001`.
+
+Loss plateaued as soon as around 20 epochs.
+
+The total training took around 5.5 minutes for 20 epochs and around 30 minutes for 100 epochs.
+
 
 ## Sampling
 
