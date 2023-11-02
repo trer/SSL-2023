@@ -104,7 +104,7 @@ def main():
     if args.mode == "debug":
         model = MNISTDiffuser(1000, 28)
         if args.load:
-            model.load_state_dict(torch.load(args.load))
+            model.load_state_dict(torch.load(args.load, map_location=device))
             model.eval()
 
         model.to(device=device)
