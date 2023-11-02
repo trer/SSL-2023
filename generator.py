@@ -1,8 +1,8 @@
-from mnist import MNIST
 import torch
+from mnist import MNIST
 from torch.utils.data import Dataset, DataLoader
+
 from utils import get_schedule, normalize
-from matplotlib import pyplot as plt
 
 
 class MNIST_Dataset(Dataset):
@@ -26,17 +26,14 @@ class MNIST_Dataset(Dataset):
         if self.index + 1 >= self.len:
             self.index = 0
             raise StopIteration
-        img = self.images[self.index:self.index + 1]
-        img = torch.asarray(img)
+        img = torch.asarray(self.images[self.index])
         img = normalize(img)
         img = torch.reshape(img, (1, 28, 28))
         self.index = self.index + 1
-        return self.create_example(img, 1)
+        return self.create_example(img)
 
     def add_noise(self, image, timestep):
-        bt = self.b_t[timestep]
         abart = self.A_t[timestep]
-        # noise_and_image = torch.normal(torch.sqrt(1 - bt) * image, bt)
         noise = torch.randn_like(image)
         image = abart.sqrt() * image + (1 - abart).sqrt() * noise
 
@@ -49,32 +46,12 @@ class MNIST_Dataset(Dataset):
         image = image + noise
         return image, noise
 
-    def create_example(self, image, batch_size=1):
-        time_step = torch.randint(0, self.T, (batch_size,))
-        #prev, noise = self.noise_to_timestep(image, time_step)
+    def create_example(self, image):
+        time_step = torch.randint(0, self.T, (1,))
         after, noise = self.add_noise(image, time_step)
         return after, noise, time_step
-
 
 
 def get_dataloader(batch_size):
     dataset = MNIST_Dataset()
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-if __name__ == "__main__":
-    dataset = MNIST_Dataset()
-    train_dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-    img = dataset.images[1]
-    img = torch.asarray(img)
-    img = normalize(img)
-    img = torch.reshape(img, (1, 28, 28))
-    fix, ax = plt.subplots(2, 10)
-    for i in range(0, 1000, 100):
-
-
-        after, noise = dataset.add_noise(img, i)
-
-        ax[0, i // 100].imshow(after[0].reshape((28, 28)), cmap='grey')
-        ax[1, i//100].imshow(noise[0].reshape((28, 28)), cmap='grey')
-
-    plt.show()
