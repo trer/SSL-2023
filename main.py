@@ -114,7 +114,7 @@ def main():
         print(image)
         noisy, noise = dataset.add_noise(image, 500)
 
-        n = model.forward(noisy, 500)
+        n = model.forward(noisy, torch.tensor(500))
 
         plt.figure()
         plt.imshow(noise.detach().reshape(28, 28).cpu(), cmap="gray")
