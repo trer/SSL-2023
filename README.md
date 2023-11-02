@@ -19,7 +19,10 @@ The model we train is a simple U-Net model. It takes as input a noisy image and 
 
 
 ## Dataset / Example generation
-
+The dataset we are using for this task is MNSIT handwritten digits. This dataset is labeled, but to keep with the spirit of the SSL-task we just use the images. These images are normalized to [-1, 1].
+To create an example for the network to train on we do the following.
+We take an unaltered image and noise with the same dimension as the image sampled from a normal distribution and create a interpolation between the two images. A parameter time_step decides how much weight is assigned to the original image and how much is assigned to the noise.
+The resulting noisy image and the time_step will be the input to the network and the sampled noise is the target.
 
 ## Training
 
