@@ -107,7 +107,7 @@ class MNISTDiffuser(torch.nn.Module):
 
     def forward(self, x: torch.tensor, t: torch.tensor):
         n = len(x)
-        t = self.time_embed(t.to(x.get_device()).long())
+        t = self.time_embed(t.to(device).long())
         out1 = self.block1(x + self.te1(t).reshape(n, -1, 1, 1))
         out2 = self.block2(self.down1(out1))
         out3 = self.bottleneck(self.down2(out2))
