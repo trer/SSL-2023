@@ -2,9 +2,9 @@
 Small group project in Self supervised learning
 
 ## Group
-Øyvind Monsen -- oyvimons@stud.ntnu.no
-Tor Dyrdal Strande -- tordstr@stud.ntnu.no
-Karl Erik Hofset -- karlehof@stud.ntnu.no
+Øyvind Monsen -- oyvimons@stud.ntnu.no  
+Tor Dyrdal Strande -- tordstr@stud.ntnu.no  
+Karl Erik Hofseth -- karlehof@stud.ntnu.no
 
 ## Goal
 
